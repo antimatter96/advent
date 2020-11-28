@@ -103,9 +103,7 @@ func day1_2(inp []string) {
 
 	for i := 0; i < len(board); i++ {
 		for j := 0; j < len(board[i]); j++ {
-
 			total += board[i][j]
-
 		}
 	}
 	fmt.Println(total)
