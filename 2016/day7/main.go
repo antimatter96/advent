@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
 	"strings"
 )
 
@@ -34,23 +33,7 @@ func day1(inp []string) {
 	fmt.Println(total)
 }
 
-func extract(s string) {
-	//fmt.Println(s)
-
-	//ss := regexp.MustCompile(`([a-z\-]+)-`)
-	ss := regexp.MustCompile(`(?:(?:([^\[][a-z]+[^\]])|(\[[a-z]+\])))`)
-	//ss := regexp.MustCompile(`([a-z\-]+)-([\d]+)\[([a-z]+)\]`)
-
-	sss := ss.FindAllStringSubmatch(s, -1)
-	//fmt.Sscanf(s, "%s-%d[%s]", frequencyString, id, checksum)
-	for _, a1 := range sss {
-		for _, a2 := range a1 {
-			fmt.Printf("|%s|%s|\n", s, a2)
-		}
-	}
-}
-
-func extract2(s string) bool {
+func extract(s string) bool {
 	ss := strings.ReplaceAll(s, "[", "--")
 	sss := strings.ReplaceAll(ss, "]", "--")
 
@@ -90,4 +73,81 @@ func containsABBA(s string) bool {
 		}
 	}
 	return false
+}
+
+func extract2(s string) bool {
+	ss := strings.ReplaceAll(s, "[", "--")
+	sss := strings.ReplaceAll(ss, "]", "--")
+
+	ssss := strings.Split(sss, "--")
+
+	hasAPalindrome := false
+	hasEnclosedPalindrome := false
+
+	insideBrackets := false
+	mpOut := make(map[string]bool)
+	mpIn := make(map[string]bool)
+
+	for _, re := range ssss {
+		//fmt.Println("|", re, "|", insideBrackets)
+
+		if re == "" {
+			insideBrackets = !insideBrackets
+			continue
+		}
+
+		if insideBrackets {
+			containsABA(re, mpIn, false)
+		} else {
+			containsABA(re, mpOut, true)
+		}
+
+		//fmt.Printf("%+v\n====\n%+v\n\n", mpIn, mpOut)
+
+		if len(mpIn) > 0 && len(mpOut) > 0 {
+			if haveCommon(mpOut, mpIn) {
+				return true
+			}
+		}
+
+		insideBrackets = !insideBrackets
+		//fmt.Println("|", re, "|", isp, insideBrackets)
+	}
+
+	//fmt.Println(hasAPalindrome, hasEnclosedPalindrome)
+	return hasAPalindrome && !hasEnclosedPalindrome
+}
+
+func containsABA(s string, mp map[string]bool, invert bool) {
+	var aba string
+	for i := 0; i < len(s)-2; i++ {
+		if s[i] != s[i+1] && s[i] == s[i+2] {
+			if invert {
+				aba = fmt.Sprintf("%c%c%c", s[i+1], s[i+2], s[i+1])
+			} else {
+				aba = s[i : i+3]
+
+			}
+			mp[aba] = true
+		}
+	}
+}
+
+func haveCommon(mpIn, mpOut map[string]bool) bool {
+	bigger := &mpIn
+	smaller := &mpOut
+
+	if len(mpOut) > len(mpIn) {
+		bigger = &mpOut
+		smaller = &mpIn
+	}
+
+	for pattern, _ := range *smaller {
+		if _, ok := (*bigger)[pattern]; ok {
+			return true
+		}
+	}
+
+	return false
+
 }
