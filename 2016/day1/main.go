@@ -9,13 +9,6 @@ import (
 	"strings"
 )
 
-const (
-	north int = iota
-	east  int = iota
-	south int = iota
-	west  int = iota
-)
-
 func main() {
 	inp := ""
 	scanner := bufio.NewScanner(os.Stdin)
