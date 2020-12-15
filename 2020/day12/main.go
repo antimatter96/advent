@@ -103,15 +103,6 @@ func rotate2(x, y, degrees int, dir string) (int, int) {
 		x = -x
 	}
 
-	// if dir == "L" {
-	// 	currentDir -= degrees
-	// } else if dir == "R" {
-	// 	currentDir += degrees
-	// }
-
-	// currentDir += 4
-	// currentDir = currentDir % 4
-
 	return x, y
 }
 
