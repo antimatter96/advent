@@ -5,5 +5,5 @@ for scanner.Scan() {
 }
 
 if scanner.Err() != nil {
-  fmt.Errorf(scanner.Err().Error())
+	panic(scanner.Err().Error())
 }

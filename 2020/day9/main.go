@@ -15,7 +15,7 @@ func main() {
 	}
 
 	if scanner.Err() != nil {
-		fmt.Errorf(scanner.Err().Error())
+		panic(scanner.Err().Error())
 	}
 
 	day(inp)
@@ -25,10 +25,6 @@ const preamble = 25
 
 func day(arr []string) {
 	mp := make(map[int]int)
-
-	// [1518-11-01 00:00] Guard #10 begins shift
-	// [1518-11-01 00:05] falls asleep
-	// [1518-11-01 00:25] wakes up
 
 	nums := make([]int, len(arr))
 

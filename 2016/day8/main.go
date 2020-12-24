@@ -28,7 +28,7 @@ func main() {
 	}
 
 	if scanner.Err() != nil {
-		fmt.Errorf(scanner.Err().Error())
+		panic(scanner.Err().Error())
 	}
 
 	day1(inp)

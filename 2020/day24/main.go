@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	// "github.com/emirpasic/gods/stacks/arraystack"
 )
 
 type directions struct {
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	if scanner.Err() != nil {
-		fmt.Errorf(scanner.Err().Error())
+		panic(scanner.Err().Error())
 	}
 
 	day22(inp)
@@ -92,7 +91,6 @@ func day22(inps []string) {
 			} else {
 				dd.update(ss[i])
 			}
-
 		}
 
 		mp[dd.String()] = !mp[dd.String()]
@@ -124,7 +122,6 @@ func part2() {
 			copy[key] = value
 		}
 
-		// fmt.Println(copy)
 		for key, v := range copy {
 			i, j, k := getIJK(key)
 
@@ -149,11 +146,9 @@ func part2() {
 			copy[s] = false
 		}
 
-		// mp = map[string]bool{}
 		for key, value := range copy {
 			mp[key] = value
 		}
-
 	}
 
 	fmt.Println(countBlack())
@@ -167,7 +162,6 @@ var temp = 0
 func updateTemp(d *directions) {
 	d.reduce()
 	s := d.String()
-	// fmt.Println("checking", s, mp[s])
 
 	mp[s] = true && mp[s]
 
@@ -200,11 +194,9 @@ func markAsWhite(d *directions) {
 }
 
 func count(i, j, k int) int {
-	// fmt.Println("counting around", i, j, k)
 	dir := &directions{i, j, k}
 
 	temp = 0
-	// fmt.Println(temp)
 
 	dir.expandMega(updateTemp)
 
