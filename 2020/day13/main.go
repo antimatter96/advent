@@ -98,7 +98,7 @@ func solve(inps []string) {
 
 	fmt.Println(start, mp)
 
-	for i := 0; i < 1<<62; i += max {
+	for i := 0; i < limit; i += max {
 		if what(i, mp) {
 			fmt.Println(i - offSetOfMax)
 			break
@@ -168,7 +168,6 @@ func solve2(inps []string) {
 	fmt.Println(start, mp)
 	fmt.Println(intervals)
 	fmt.Println(offsets)
-	// fmt.Println(1 << 62)
 
 	startFromBack := limit
 	startFromBack -= (limit % max)

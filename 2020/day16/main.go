@@ -159,7 +159,7 @@ func day1(unparsed string) {
 		tots *= uint64(myTicket[orderOfField[i]])
 	}
 
-	fmt.Println(">>", tots, "<<")
+	fmt.Println("==>", tots, "<==")
 
 	// VERIFY
 	for k, v := range orderOfField {
