@@ -24,165 +24,149 @@ func main() {
 	day22(inp)
 }
 
-var ROUNDS = 10000000
-var NUMBER = 1000000
-
 func day22(inp string) {
 	inp = strings.TrimSpace(inp)
 
 	ss := strings.Split(inp, "")
+	r := ring{}
+	r.arr = make([]int, len(ss))
 
-	temp, _ := strconv.Atoi(ss[0])
-	head := &node{val: temp}
-	mainMap[temp] = head
-	ptr := head
-
-	for i := 1; i < len(ss); i++ {
-		temp, _ := strconv.Atoi(ss[i])
-		ptr.next = &node{val: temp}
-		mainMap[temp] = ptr.next
-		ptr = ptr.next
+	for i, v := range ss {
+		temp, _ := strconv.Atoi(v)
+		r.arr[i] = temp
 	}
 
-	for i := len(ss); i < NUMBER; i++ {
-		ptr.next = &node{val: i + 1}
-		mainMap[i+1] = ptr.next
-		ptr = ptr.next
-	}
-
-	ptr.next = head
-
-	run(head)
-}
-
-type node struct {
-	val  int
-	next *node
+	r.temp = make([]int, 3)
+	r.tempMap = make(map[int]bool)
+	run(&r)
 }
 
 type ring struct {
+	arr     []int
 	temp    []int
 	tempMap map[int]bool
 }
 
-func print(head *node, highlight int) {
-	ptr := head
-	mp := make(map[int]bool)
+func run(r *ring) {
+	i := 0
 
+	for k := 0; k < 100; k++ {
+
+		// fmt.Println("Current", r.arr[i])
+		// fmt.Println("cups:", print(r.arr, r.arr[i]))
+
+		thisWas := r.arr[i]
+		r.remove(i, 3)
+
+		// fmt.Println(r.arr)
+		// fmt.Println(r)
+
+		jj := r.findNext(r.arr[i])
+		theNext := r.arr[jj]
+
+		// fmt.Println(r.arr[i], jj)
+
+		r.j()
+		j := r.findThis(theNext)
+		// fmt.Println(r.temp)
+		// fmt.Println("destination:", r.arr[j])
+		r.fill(j)
+
+		i = r.findThis(thisWas)
+		i++
+		i = i % len(r.arr)
+
+		// fmt.Println()
+	}
+
+	fmt.Println(r)
+}
+
+func print(arr []int, highlight int) string {
 	s := ""
-	for ptr != nil {
-		if mp[ptr.val] {
-			break
-		}
 
-		if ptr.val == highlight {
-			s += fmt.Sprintf("(%d) ", ptr.val)
+	for _, v := range arr {
+		if v == highlight {
+			s += fmt.Sprintf("(%d) ", v)
 		} else {
-			s += fmt.Sprintf("%d ", ptr.val)
+			s += fmt.Sprintf("%d ", v)
 		}
-
-		mp[ptr.val] = true
-
-		ptr = ptr.next
 	}
-
-	fmt.Println(s)
+	return s
 }
 
-func run(head *node) {
-	temp := head
+func (r *ring) remove(afterIndex, n int) {
+	var i = afterIndex
 
-	x := ROUNDS / 20
-	x++
+	r.tempMap = make(map[int]bool)
 
-	for k := 0; k < ROUNDS; k++ {
-		if k%(x) == 0 {
-			fmt.Println("-- move", k+1, "--")
-		}
-
-		startOfRemoved := remove(temp, 3)
-
-		afterThis := findNext(temp, temp.val)
-
-		add(afterThis, startOfRemoved, 3)
-
-		// print(temp, -1)
-
-		temp = temp.next
+	var index int
+	for j := 0; j < n; j++ {
+		index = (i + 1 + j) % len(r.arr)
+		r.temp[j] = r.arr[index]
+		r.arr[index] = -1
+		r.tempMap[r.temp[j]] = true
 	}
 
-	tt := mainMap[1]
-
-	fmt.Println(tt.next.val * tt.next.next.val)
-	// print(head, -1)
+	// fmt.Println(r.tempMap)
 }
 
-var tempMap = make(map[int]bool)
-var tempArr = []int{1, 1, 1}
-
-var mainMap = make(map[int]*node)
-
-func remove(ptr *node, n int) *node {
-	temp := ptr.next
-	temp2 := ptr.next
-	// temp := z
-
-	tempMap = make(map[int]bool)
-
-	for i := 0; i < n; i++ {
-		tempArr[i] = temp.val
-		tempMap[temp.val] = true
-
-		temp = temp.next
-	}
-
-	ptr.next = temp
-
-	return temp2
-}
-
-func findNext(head *node, n int) *node {
+func (r *ring) findNext(n int) int {
 	// fmt.Println("next to ", n)
 	k := n
 	for k-1 > 0 {
-		if _, v := tempMap[k-1]; !v {
-			return mainMap[k-1]
+		if _, v := r.tempMap[k-1]; !v {
+			return r.findThis(k - 1)
 		}
 		k--
 	}
-
-	k = NUMBER
+	// fmt.Println("roll over ")
+	k = len(r.arr)
 	for k > 0 {
-		if _, v := tempMap[k]; !v {
-			return mainMap[k]
+		if _, v := r.tempMap[k]; !v {
+			return r.findThis(k)
 		}
 		k--
 	}
-	return nil
+	return 0
 }
 
-func findThis(head *node, n int) (ptr *node) {
-	fmt.Println("finding", n)
-	ptr = head
+func (r *ring) findThis(n int) (index int) {
+	index = 0
 
-	for ptr != nil {
-		if ptr.val == n {
-			return ptr
+	for i, v := range r.arr {
+		if v == n {
+			index = i
+			return
 		}
-		ptr = ptr.next
 	}
 
-	return ptr
+	return
 }
 
-func add(where, addThese *node, n int) {
-	temp := where.next
+var temp = make([]int, 9)
 
-	where.next = addThese
-
-	ptr := addThese
-	for i := 0; i < n-1; i++ {
-		ptr = ptr.next
+func (r *ring) j() {
+	i := 0
+	for _, v := range r.arr {
+		if v == -1 {
+			continue
+		}
+		temp[i] = v
+		i++
 	}
-	ptr.next = temp
+	r.arr = temp
+}
+
+func (r *ring) fill(index int) {
+	n := len(r.arr)
+
+	for i := n - 1; i-3 > index && i-3 > -1; i-- {
+		r.arr[i] = r.arr[i-3]
+		r.arr[i-3] = 0
+	}
+
+	for j := 0; j < 3; j++ {
+		r.arr[index+1+j] = r.temp[j]
+	}
 }
