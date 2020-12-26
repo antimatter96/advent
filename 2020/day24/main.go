@@ -203,30 +203,19 @@ func count(i, j, k int) int {
 	return temp
 }
 
+func doStuff(x *int, diff int, d *directions, ff func(*directions)) {
+	(*x) += diff
+	ff(d)
+	(*x) -= diff
+}
+
 func (d *directions) expandMega(ff func(*directions)) {
-	d.i++
-	ff(d)
-	d.i--
+	doStuff(&(d.i), 1, d, ff)
+	doStuff(&(d.j), 1, d, ff)
+	doStuff(&(d.k), 1, d, ff)
 
-	d.j++
-	ff(d)
-	d.j--
-
-	d.k++
-	ff(d)
-	d.k--
-
-	d.i--
-	ff(d)
-	d.i++
-
-	d.j--
-	ff(d)
-	d.j++
-
-	d.k--
-	ff(d)
-	d.k++
-
+	doStuff(&(d.i), -1, d, ff)
+	doStuff(&(d.j), -1, d, ff)
+	doStuff(&(d.k), -1, d, ff)
 	d.reduce()
 }
