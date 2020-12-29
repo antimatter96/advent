@@ -54,7 +54,7 @@ func getOccupied(i, j, k int, mp *map[string]bool) int {
 	for x, fI := range funcs {
 		for y, fJ := range funcs {
 			for z, fK := range funcs {
-				if x+y+z != 0 { // same,same,same,same
+				if x+y+z != 0 { // same,same,same
 					occupied += findStuff(i, j, k, mp, fI, fJ, fK)
 				}
 			}
