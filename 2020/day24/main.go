@@ -125,7 +125,7 @@ func part2() {
 		for key, v := range copy {
 			i, j, k := getIJK(key)
 
-			isReduced(i, j, k)
+			// isReduced(i, j, k)
 			occupied := count(i, j, k)
 
 			if v {

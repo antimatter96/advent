@@ -28,7 +28,7 @@ func day1(inp []string) {
 
 	for _, s := range inp {
 		frequencyString, id, checksum := extract(s)
-		//fmt.Println(frequencyString, ">> ", id, "<<", checksum)
+		//fmt.Println(frequencyString, "==>", id, "<==", checksum)
 		if isItTheChecksum(frequencyString, checksum) {
 			total += id
 		}
