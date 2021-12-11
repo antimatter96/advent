@@ -4,5 +4,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"editor.fontFamily": "'Fira Code' ,Menlo, Monaco, 'Courier New', monospace"
+	}
 }

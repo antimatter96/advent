@@ -11,5 +11,5 @@ void async function () {
   console.log(chalk.blue("File".padEnd(10, " ")), chalk.bold.redBright(`${inputFile}`))
 
   await $`cd day_${day} && \
-  cat ${inputFile} | go run main.go`
+  cat ${inputFile} | go run .`
 }()
