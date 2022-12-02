@@ -4,6 +4,9 @@ import (
 	"testing"
 )
 
+const p1Answer int = 24000
+const p2Answer int = 45000
+
 var testInput = `
 1000
 2000
@@ -24,12 +27,12 @@ var testInput = `
 func TestRun(t *testing.T) {
 	p1, p2 := Run(testInput)
 
-	if p1 != 24000 {
-		t.Errorf("expected %d but got %d", 24000, p1)
+	if p1 != p1Answer {
+		t.Errorf("expected %d but got %d", p1Answer, p1)
 	}
 
-	if p2 != 45000 {
-		t.Errorf("expected %q but got %q", 45000, p2)
+	if p2 != p2Answer {
+		t.Errorf("expected %q but got %q", p2Answer, p2)
 	}
 }
 
