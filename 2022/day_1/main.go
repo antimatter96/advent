@@ -1,30 +1,16 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/antimatter96/advent/2022/common"
 )
 
-func takeInput() string {
-	var inp string
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		inp += scanner.Text() + "\n"
-	}
-
-	if scanner.Err() != nil {
-		panic(scanner.Err().Error())
-	}
-
-	return inp
-}
-
 func main() {
-	rawInput := takeInput()
+	rawInput := common.TakeInputAsString()
 
 	fmt.Println(Run(rawInput))
 }
