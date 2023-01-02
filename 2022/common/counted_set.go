@@ -4,6 +4,18 @@ type CountedSet[K comparable] struct {
 	mp map[K]int
 }
 
+func (set *CountedSet[K]) Has(e K) bool {
+	if set.mp == nil {
+		return false
+	}
+
+	if set.mp[e] == 0 {
+		return false
+	}
+
+	return true
+}
+
 func (set *CountedSet[K]) Add(e K) {
 	if set.mp == nil {
 		set.mp = make(map[K]int)
