@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/antimatter96/advent/2023/common"
@@ -11,8 +10,8 @@ func main() {
 	rawInput := common.TakeInputAsStringArray()
 
 	p1, p2 := Run(rawInput)
-	fmt.Println("Answer 1", p1)
-	fmt.Println("Answer 2", p2)
+	common.Log.Info().Int("Answer 1", p1).Send()
+	common.Log.Info().Int("Answer 2", p2).Send()
 }
 
 func parsePart1(inp []string) []string {
@@ -36,7 +35,7 @@ func extractActualValue(garbledCalibrationValue string) int {
 	var actualCalibratedValue int
 
 	for i := 0; i < len(garbledCalibrationValue); i++ {
-		fmt.Println("[DEBUG]", garbledCalibrationValue[i])
+		common.Log.Debug().Any("garbledCalibrationValue[i]", garbledCalibrationValue[i]).Send()
 		if garbledCalibrationValue[i] > 47 && garbledCalibrationValue[i] < 58 {
 			actualCalibratedValue = (int(garbledCalibrationValue[i]) - 48) * 10
 			break
@@ -44,7 +43,7 @@ func extractActualValue(garbledCalibrationValue string) int {
 	}
 
 	for i := len(garbledCalibrationValue) - 1; i > -1; i-- {
-		fmt.Println("[DEBUG]", garbledCalibrationValue[i])
+		common.Log.Debug().Any("garbledCalibrationValue[i]", garbledCalibrationValue[i]).Send()
 		if garbledCalibrationValue[i] > 47 && garbledCalibrationValue[i] < 58 {
 			actualCalibratedValue += (int(garbledCalibrationValue[i]) - 48)
 			break
@@ -58,11 +57,10 @@ func Part1(garbledCalibrationValues []string) int {
 	var sum int
 
 	for i := 0; i < len(garbledCalibrationValues); i++ {
-		fmt.Println("[DEBUG]", "garbledCalibrationValues", garbledCalibrationValues[i])
-
+		common.Log.Debug().Any("garbledCalibrationValues", garbledCalibrationValues[i]).Send()
 		actualCalibratedValue := extractActualValue(garbledCalibrationValues[i])
 
-		fmt.Println("[DEBUG]", "actualCalibratedValue", actualCalibratedValue)
+		common.Log.Debug().Any("actualCalibratedValue", actualCalibratedValue).Send()
 
 		sum += actualCalibratedValue
 	}
