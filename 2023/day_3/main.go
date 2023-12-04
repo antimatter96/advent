@@ -77,7 +77,6 @@ var whenToStop map[rune]struct{} = map[rune]struct{}{
 }
 
 func Part1(schematic common.Graph[rune]) int {
-
 	sumGraph1 := sumGraph(schematic)
 	common.Log.Debug().Int("initial", sumGraph1).Send()
 
@@ -85,9 +84,6 @@ func Part1(schematic common.Graph[rune]) int {
 		for j := 0; j < len(schematic[0]); j++ {
 			if _, ok := symbols[schematic[i][j]]; ok {
 				common.StartFloodFill[rune](schematic, i, j, schematic[i][j], whenToProcees, whenToStop)
-
-				// schematic.Print()
-
 			}
 		}
 
@@ -96,14 +92,34 @@ func Part1(schematic common.Graph[rune]) int {
 	sumGraph2 := sumGraph(schematic)
 
 	common.Log.Debug().Int("final", sumGraph2).Send()
-
 	common.Log.Debug().Int("answer", sumGraph1-sumGraph2).Send()
 
 	return sumGraph1 - sumGraph2
 }
 
 func Part2(schematic common.Graph[rune]) int {
-	return 0
+	sum := 0
+
+	for i := 0; i < len(schematic); i++ {
+		for j := 0; j < len(schematic[0]); j++ {
+
+			if schematic[i][j] == '*' {
+
+				numbers := common.StartExtractNumbersFrom[rune](schematic, i, j, whenToProcees, whenToStop)
+
+				if len(numbers) == 2 {
+					product := 1
+					for _, numRuneArr := range numbers {
+						product *= runesToInt(numRuneArr)
+					}
+					sum += product
+				}
+			}
+
+		}
+	}
+
+	return sum
 }
 
 func sumGraph(schematic common.Graph[rune]) int {
@@ -145,5 +161,17 @@ func sumGraph(schematic common.Graph[rune]) int {
 	}
 
 	return sum
-	return sum
+}
+
+func runesToInt(arr []rune) int {
+	strb := strings.Builder{}
+
+	for _, r := range arr {
+		strb.WriteRune(r)
+
+	}
+
+	number, _ := strconv.Atoi(strb.String())
+
+	return number
 }
