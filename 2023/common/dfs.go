@@ -13,7 +13,7 @@ func FloodFill[K comparable](graph [][]K, x, y int, whatToReplaceWith K, whenToP
 		return
 	}
 
-	Log.Debug().Str("graph[x,y]", fmt.Sprintf("%c", graph[x][y])).Send()
+	Log.Debug().Str("graph[x,y]", fmt.Sprintf("%v", graph[x][y])).Send()
 
 	if _, ok := whenToStop[graph[x][y]]; ok {
 		return
@@ -70,7 +70,7 @@ func ExtractNumbersFrom[K comparable](graph [][]K, x, y int, direction int, when
 		return numbers
 	}
 
-	Log.Debug().Str("graph[x,y]", fmt.Sprintf("%c", graph[x][y])).Send()
+	Log.Debug().Str("graph[x,y]", fmt.Sprintf("%v", graph[x][y])).Send()
 
 	numbers = append(numbers, graph[x][y])
 
@@ -85,7 +85,7 @@ func ExtractNumbersFrom[K comparable](graph [][]K, x, y int, direction int, when
 			}
 
 			numbers = append(numbers, graph[x][j])
-			Log.Debug().Str("graph[x,y]", fmt.Sprintf("%c", graph[x][j])).Send()
+			Log.Debug().Str("graph[x,y]", fmt.Sprintf("%v", graph[x][j])).Send()
 		}
 	}
 
@@ -100,7 +100,7 @@ func ExtractNumbersFrom[K comparable](graph [][]K, x, y int, direction int, when
 			}
 
 			numbers = append([]K{graph[x][j]}, numbers...)
-			Log.Debug().Str("graph[x,y]", fmt.Sprintf("%c", graph[x][j])).Send()
+			Log.Debug().Str("graph[x,y]", fmt.Sprintf("%v", graph[x][j])).Send()
 		}
 	}
 	return numbers
@@ -173,7 +173,7 @@ func StartExtractNumbersFrom[K comparable](graph [][]K, x, y int, whenToProcees 
 func toString[K comparable](arr []K) string {
 	var s string
 	for _, e := range arr {
-		s += fmt.Sprintf("%c", e)
+		s += fmt.Sprintf("%v", e)
 	}
 
 	return s
