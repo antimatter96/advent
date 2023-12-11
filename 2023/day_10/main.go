@@ -43,36 +43,9 @@ func Run(inp string) (int, int) {
 var options = []string{"|", "-", "J", "7", "F", "L"}
 
 func Part1(field common.Graph[string]) int {
-	max := 0
-
-	startX, startY := field.Find("S")
-	common.Log.Debug().Int("x", startX).Int("y", startY).Send()
-
-	for _, option := range options {
-		bfsContainer := bfsContainer{}
-
-		if canFit(startX, startY, option, field) {
-			common.Log.Debug().Str("option", option).Send()
-
-			field[startX][startY] = option
-
-			bfsContainer.Start(startX, startY, &field, same)
-
-			max = bfsContainer.MaxDistance()
-
-			common.Log.Debug().Int("max", max).Str("for option", option).Send()
-			break
-		}
-
-	}
-
-	return max
-}
-
-func Part2(field common.Graph[string]) int {
-	startX, startY := field.Find("S")
-
 	field.Print()
+
+	startX, startY := field.Find("S")
 
 	bfsContainer := bfsContainer{}
 
@@ -86,17 +59,35 @@ func Part2(field common.Graph[string]) int {
 	common.Log.Debug().Str("finalOption", finalOption).Send()
 
 	field[startX][startY] = finalOption
-	bfsContainer.Start(startX, startY, &field, replacer)
+	bfsContainer.Start(startX, startY, field, replacer)
 
+	return bfsContainer.MaxDistance()
+
+}
+
+func Part2(field common.Graph[string]) int {
 	field.Print()
 
-	bfsContainer.cleanUp(&field)
-	field.Print()
-	ans := bfsContainer.countInside(&field)
+	startX, startY := field.Find("S")
+
+	bfsContainer := bfsContainer{}
+
+	finalOption := ""
+	for _, possibleOption := range options {
+		if canFit(startX, startY, possibleOption, field) {
+			finalOption = possibleOption
+			break
+		}
+	}
+	common.Log.Debug().Str("finalOption", finalOption).Send()
+
+	field[startX][startY] = finalOption
+	bfsContainer.Start(startX, startY, field, replacer)
+
+	bfsContainer.cleanUp(field)
 	field.Print()
 
-	return ans
-
+	return bfsContainer.countInside(field)
 }
 
 func outOfBounds(x, y, maxX, maxY int) bool {
@@ -111,11 +102,13 @@ func outOfBounds(x, y, maxX, maxY int) bool {
 	return false
 }
 
+type nextGenerator func(int) int
+
 type fitOption struct {
-	newX1, newY1  func(int) int
+	newX1, newY1  nextGenerator
 	notAllowedIn1 string
 
-	newX2, newY2 func(int) int
+	newX2, newY2 nextGenerator
 
 	notAllowedIn2 string
 }
@@ -240,27 +233,25 @@ type bfsContainer struct {
 	distance [][]int
 }
 
-func (b *bfsContainer) Start(x, y int, field *common.Graph[string], replacerFunc func(string) string) {
+func (b *bfsContainer) Start(x, y int, field common.Graph[string], replacerFunc func(string) string) {
 	b.queue = common.Queue[point]{}
 	b.queue.Push(point{x, y, 0})
 
-	b.distance = make([][]int, len(*field))
+	b.distance = make([][]int, len(field))
 	for i := 0; i < len(b.distance); i++ {
-		b.distance[i] = make([]int, len((*field)[i]))
+		b.distance[i] = make([]int, len(field[i]))
 	}
 
 	b.done = make(map[string]bool)
 
 	b.basicBFS(field, replacerFunc)
-
-	common.Log.Debug().Int("don", len(b.done)).Send()
 }
 
 func (b *bfsContainer) MaxDistance() int {
 	return common.MaxIntInts(b.distance)
 }
 
-func (b *bfsContainer) basicBFS(field *common.Graph[string], replacerFunc func(string) string) {
+func (b *bfsContainer) basicBFS(field common.Graph[string], replacerFunc func(string) string) {
 	for !b.queue.Empty() {
 
 		p := b.queue.Pop()
@@ -272,7 +263,7 @@ func (b *bfsContainer) basicBFS(field *common.Graph[string], replacerFunc func(s
 
 		b.distance[p.x][p.y] = p.distance
 
-		tile := (*field)[p.x][p.y]
+		tile := field[p.x][p.y]
 
 		option := fitOptions[tile]
 
@@ -282,66 +273,60 @@ func (b *bfsContainer) basicBFS(field *common.Graph[string], replacerFunc func(s
 		b.queue.Push(point{x1, y1, p.distance + 1})
 		b.queue.Push(point{x2, y2, p.distance + 1})
 
-		(*field)[p.x][p.y] = replacerFunc(tile)
+		field[p.x][p.y] = replacerFunc(tile)
 	}
 
 }
 
-func (b *bfsContainer) cleanUp(field *common.Graph[string]) {
+func (b *bfsContainer) cleanUp(field common.Graph[string]) {
 
-	for x := 0; x < len(*field); x++ {
+	for x := 0; x < len(field); x++ {
 
-		for y := 0; y < len((*field)[0]); y++ {
+		for y := 0; y < len(field[0]); y++ {
 			if b.done[pointToString(x, y)] {
 				break
 			}
-			(*field)[x][y] = " "
+			field[x][y] = " "
 		}
 
-		for y := len((*field)[0]) - 1; y > -1; y-- {
+		for y := len(field[0]) - 1; y > -1; y-- {
 			if b.done[pointToString(x, y)] {
 				break
 			}
-			(*field)[x][y] = " "
+			field[x][y] = " "
 		}
 	}
 
 }
 
-func (b *bfsContainer) countInside(field *common.Graph[string]) int {
+func (b *bfsContainer) countInside(field common.Graph[string]) int {
 	count := 0
 
-	for x := 0; x < len(*field); x++ {
-		common.Log.Debug().Int("line", x).Send()
-
+	for x := 0; x < len(field); x++ {
 		lastWas := "x"
 		inside := false
 
-		for y := 0; y < len((*field)[0]); y++ {
-
-			tile := (*field)[x][y]
+		for y := 0; y < len(field[0]); y++ {
 
 			if !b.done[pointToString(x, y)] {
-				(*field)[x][y] = "O"
 				if inside {
+					common.Log.Debug().Ints("inside", []int{x, y}).Send()
+
 					count++
-					(*field)[x][y] = "I"
 				}
 				continue
 			}
 
-			if tile == "-" {
+			tile := field[x][y]
+
+			verticalTile := (tile == "|" || tile == "J" || tile == "L" || tile == "7" || tile == "F")
+
+			if !verticalTile {
 				continue
 			}
 
 			if tile == "|" {
 				inside = !inside
-				continue
-			}
-
-			verticalTile := (tile == "J" || tile == "L" || tile == "7" || tile == "F")
-
-			if !verticalTile {
 				continue
 			}
 
