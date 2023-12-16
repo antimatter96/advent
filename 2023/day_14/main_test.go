@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"strings"
 	"testing"
@@ -39,16 +38,11 @@ func TestRun(t *testing.T) {
 }
 
 func createInput() []string {
-	_ = 10 + rand.Intn(91)
-	_ = 10 + rand.Intn(91)
-
-	m := 100
-	n := 100
+	m := 10 + rand.Intn(91)
+	n := 10 + rand.Intn(91)
 
 	options := []string{"#", ".", "O"}
 	testInputNew := make([]string, 0, m)
-
-	fmt.Println(m, n)
 
 	for i := 0; i < m; i++ {
 		row := strings.Builder{}

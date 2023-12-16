@@ -1,2 +1,9 @@
-go build  -o main_nopgo .
-go build -o main_withpgo -pgo=auto  -gcflags="-m=2 -d=pgoinlinebudget=20000,pgoinlinecdfthreshold=95,pgodebug=3"   .  > out.txt.1 2>&1
+go build -o main_nopgo .
+
+cat input.txt | ./main_nopgo -cpuprofile=true
+
+go build -o main_withpgo -pgo=auto -gcflags="-m=2 -d=pgoinlinebudget=20000,pgoinlinecdfthreshold=95,pgodebug=3" . > out.txt.1 2>&1
+
+time cat input.txt | ./main_nopgo
+time cat input.txt | ./main_withpgo
+

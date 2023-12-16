@@ -1,17 +1,13 @@
 package main
 
 import (
-	"flag"
 	"strings"
 
 	"github.com/antimatter96/advent/2023/common"
 )
 
 func main() {
-	var cpuprofile = flag.String("cpuprofile", "default.pgo", "write cpu profile to `file`")
-	flag.Parse()
-
-	close := common.RuntimeProf(*cpuprofile)
+	close := common.RuntimeProf()
 	defer close()
 
 	rawInput := common.TakeInputAsStringArray()
