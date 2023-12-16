@@ -1,12 +1,19 @@
 package main
 
 import (
+	"flag"
 	"strings"
 
 	"github.com/antimatter96/advent/2023/common"
 )
 
 func main() {
+	var cpuprofile = flag.String("cpuprofile", "default.pgo", "write cpu profile to `file`")
+	flag.Parse()
+
+	close := common.RuntimeProf(*cpuprofile)
+	defer close()
+
 	rawInput := common.TakeInputAsStringArray()
 
 	p1, p2 := Run(rawInput)
@@ -92,7 +99,6 @@ func Part2(board common.Graph[string]) int {
 		}
 		seen[str] = i
 		reverse[i] = str
-
 	}
 
 	common.Log.Debug().Int("start", start).Int("diff", diff).Send()
@@ -100,6 +106,7 @@ func Part2(board common.Graph[string]) int {
 	cycles := (limit - start) / diff
 	done := cycles * diff
 	left := limit - start - done
+
 	common.Log.Debug().Int("cycles", cycles).Int("done", done).Int("left", left).Send()
 
 	targetBoard := recreate(reverse[start+left-1], len(board), len(board[0]))
@@ -109,18 +116,6 @@ func Part2(board common.Graph[string]) int {
 	sum = sumWeights(targetBoard)
 
 	return sum
-}
-
-func badString(board common.Graph[string]) string {
-	res := strings.Builder{}
-
-	for _, row := range board {
-		for _, cell := range row {
-			res.WriteString(cell)
-		}
-	}
-
-	return res.String()
 }
 
 func recreate(badString string, m, n int) common.Graph[string] {
@@ -157,110 +152,6 @@ func sumWeights(board common.Graph[string]) int {
 	return sum
 }
 
-func shiftNorthNew(board common.Graph[string]) {
-
-	shift(board,
-		0, len(board[0]),
-		0, limitMax(len(board)-1), inc,
-		innerDiff(same), outerDiff(same),
-		innerDiff(inc), outerDiff(same),
-	)
-
-}
-
-func shiftSouthNew(board common.Graph[string]) {
-
-	shift(board,
-		0, len(board[0]),
-		len(board)-1, limitMin(0), dec,
-		innerDiff(same), outerDiff(same),
-		innerDiff(dec), outerDiff(same),
-	)
-
-}
-
-func shiftWestNew(board common.Graph[string]) {
-
-	shift(board,
-		0, len(board),
-		0, limitMax(len(board[0])-1), inc,
-		outerDiff(same), innerDiff(same),
-		outerDiff(same), innerDiff(inc),
-	)
-
-}
-
-func shiftEastNew(board common.Graph[string]) {
-
-	shift(board,
-		0, len(board),
-		len(board[0])-1, limitMin(0), dec,
-		outerDiff(same), innerDiff(same),
-		outerDiff(same), innerDiff(dec),
-	)
-
-}
-func shift(board common.Graph[string], outerStart, outerLimit int, innerStart int, innerLimit func(int) bool, innerFunc func(int) int, checkXFunc, checkYFunc, againstXFunc, againstYFunc func(int, int) int) {
-
-	for outer := outerStart; outer < outerLimit; outer++ {
-
-		changed := true
-		for changed {
-			changed = false
-
-			for inner := innerStart; innerLimit(inner); inner = innerFunc(inner) {
-
-				checkX := checkXFunc(inner, outer)
-				checkY := checkYFunc(inner, outer)
-				againstX := againstXFunc(inner, outer)
-				againstY := againstYFunc(inner, outer)
-
-				if board[checkX][checkY] == "." && board[againstX][againstY] == "O" {
-					board[checkX][checkY] = "O"
-					board[againstX][againstY] = "."
-					changed = true
-				}
-
-			}
-
-		}
-	}
-}
-
-func limitMax(limit int) func(int) bool {
-	return func(i int) bool {
-
-		return i < limit
-	}
-}
-
-func limitMin(limit int) func(int) bool {
-	return func(i int) bool {
-
-		return i > limit
-	}
-}
-
-func dec(i int) int {
-	return i - 1
-}
-
-func inc(i int) int {
-	return i + 1
-}
-
-func same(i int) int {
-	return i
-}
-
-func innerDiff(changeFunc func(int) int) func(int, int) int {
-	return func(inner, outer int) int {
-		return changeFunc(inner)
-	}
-}
-
-func outerDiff(changeFunc func(int) int) func(int, int) int {
-	return func(inner, outer int) int {
-		return changeFunc(outer)
-	}
+func badString(board common.Graph[string]) string {
+	return badStringRangePre(board)
 }

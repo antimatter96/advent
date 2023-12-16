@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-
-	"github.com/antimatter96/advent/2023/common"
 )
 
 const p1Answer int = 136
@@ -40,36 +38,12 @@ func TestRun(t *testing.T) {
 	}
 }
 
-var implementationTestArrays = []struct {
-	name    string
-	oldFunc func(board common.Graph[string])
-	newFunc func(board common.Graph[string])
-}{
-	{
-		name:    "north",
-		oldFunc: shiftNorth,
-		newFunc: shiftNorthNew,
-	},
-	{
-		name:    "south",
-		oldFunc: shiftSouth,
-		newFunc: shiftSouthNew,
-	},
-	{
-		name:    "west",
-		oldFunc: shiftWest,
-		newFunc: shiftWestNew,
-	},
-	{
-		name:    "east",
-		oldFunc: shiftEast,
-		newFunc: shiftEastNew,
-	},
-}
-
 func createInput() []string {
-	m := 10 + rand.Intn(91)
-	n := 10 + rand.Intn(91)
+	_ = 10 + rand.Intn(91)
+	_ = 10 + rand.Intn(91)
+
+	m := 100
+	n := 100
 
 	options := []string{"#", ".", "O"}
 	testInputNew := make([]string, 0, m)
@@ -88,47 +62,4 @@ func createInput() []string {
 	}
 
 	return testInputNew
-}
-
-func TestDifferentImplementations(t *testing.T) {
-	testInput := createInput()
-
-	for _, testCase := range implementationTestArrays {
-		parsed1 := parsePart1(testInput)
-		parsed2 := parsePart1(testInput)
-
-		testCase.oldFunc(parsed1)
-		testCase.newFunc(parsed2)
-
-		expected := badString(parsed1)
-		got := badString(parsed2)
-
-		if got != expected {
-			t.Errorf("failed %s", testCase.name)
-		}
-	}
-
-}
-
-func BenchmarkImplementations(b *testing.B) {
-	testInput := createInput()
-
-	for _, implementations := range implementationTestArrays {
-
-		parsed1 := parsePart1(testInput)
-		parsed2 := parsePart1(testInput)
-
-		b.Run(implementations.name+" old", func(subB *testing.B) {
-			for i := 0; i < subB.N; i++ {
-				implementations.oldFunc(parsed1)
-			}
-		})
-
-		b.Run(implementations.name+" new", func(subB *testing.B) {
-			for i := 0; i < subB.N; i++ {
-				implementations.newFunc(parsed2)
-			}
-		})
-	}
-
 }

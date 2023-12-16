@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"math"
 	"sort"
 	"strconv"
@@ -21,6 +22,12 @@ type instruction struct {
 }
 
 func main() {
+	var cpuprofile = flag.String("cpuprofile", "default.pgo", "write cpu profile to `file`")
+	flag.Parse()
+
+	close := common.RuntimeProf(*cpuprofile)
+	defer close()
+
 	rawInput := common.TakeInputAsStringArray()
 
 	p1, p2 := Run(rawInput)

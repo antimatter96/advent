@@ -1,1 +1,5 @@
 day_*/input.txt
+
+day_*/*.pgo
+
+day_*/build.out.txt.*
