@@ -1,0 +1,351 @@
+package main
+
+import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+
+	"github.com/antimatter96/advent/2023/common"
+)
+
+func main() {
+	rawInput := common.TakeInputAsStringArray()
+
+	p1, p2 := Run(rawInput)
+	common.Log.Info().Int("Answer 1", p1).Send()
+	common.Log.Info().Int("Answer 2", p2).Send()
+}
+
+const (
+	DIRECTION_UP    = "U"
+	DIRECTION_DOWN  = "D"
+	DIRECTION_LEFT  = "L"
+	DIRECTION_RIGHT = "R"
+)
+
+type instruction struct {
+	direction string
+	length    int
+
+	color string
+}
+
+func parsePart1(inpLines []string) []instruction {
+	instructions := make([]instruction, 0, len(inpLines))
+
+	for i := 0; i < len(inpLines); i++ {
+
+		inpLines[i] = strings.TrimSpace(inpLines[i])
+
+		if inpLines[i] == "" || inpLines[i] == " " {
+			continue
+		}
+
+		instruction := instruction{}
+		var direction string
+
+		fmt.Sscanf(inpLines[i], "%s %d (#%s)", &direction, &instruction.length, &instruction.color)
+
+		switch direction {
+		case "U":
+			instruction.direction = DIRECTION_UP
+		case "D":
+			instruction.direction = DIRECTION_DOWN
+		case "L":
+			instruction.direction = DIRECTION_LEFT
+		case "R":
+			instruction.direction = DIRECTION_RIGHT
+		}
+
+		instructions = append(instructions, instruction)
+	}
+
+	for i := 0; i < len(instructions); i++ {
+		common.Log.Debug().Str("d", instructions[i].direction).Int("l", instructions[i].length).Str("color", instructions[i].color).Send()
+	}
+
+	return instructions
+}
+
+func parsePart2(inpLines []string) []instruction {
+	instructions := make([]instruction, 0, len(inpLines))
+
+	for i := 0; i < len(inpLines); i++ {
+
+		inpLines[i] = strings.TrimSpace(inpLines[i])
+
+		if inpLines[i] == "" || inpLines[i] == " " {
+			continue
+		}
+
+		instruction := instruction{}
+		var length string
+
+		fmt.Sscanf(inpLines[i], "%s %s (#%s)", &instruction.color, &instruction.color, &length)
+
+		switch length[5:6] {
+		case "3":
+			instruction.direction = DIRECTION_UP
+		case "1":
+			instruction.direction = DIRECTION_DOWN
+		case "2":
+			instruction.direction = DIRECTION_LEFT
+		case "0":
+			instruction.direction = DIRECTION_RIGHT
+		}
+
+		x, _ := strconv.ParseInt(length[0:5], 16, 0)
+		instruction.length = int(x)
+
+		instructions = append(instructions, instruction)
+		common.Log.Debug().Str(".", inpLines[i]).Str(".", length[0:5]).Str("d", instructions[i].direction).Int("l", instructions[i].length).Send()
+	}
+
+	return instructions
+}
+
+func Run(inp []string) (int, int) {
+	parsedPart1 := parsePart1(inp)
+	parsedPart2 := parsePart2(inp)
+
+	return Part1(parsedPart1), Part2(parsedPart2)
+}
+
+func Part1(instructions []instruction) int {
+	x, y := 0, 0
+
+	maxX, maxY, minX, minY := math.MinInt, math.MinInt, math.MaxInt, math.MaxInt
+
+	for _, insinstruction := range instructions {
+
+		switch insinstruction.direction {
+		case DIRECTION_DOWN:
+			y += insinstruction.length
+
+			if y > maxY {
+				maxY = y
+			}
+		case DIRECTION_UP:
+			y -= insinstruction.length
+
+			if y < minY {
+				minY = y
+			}
+		case DIRECTION_RIGHT:
+			x += insinstruction.length
+
+			if x > maxX {
+				maxX = x
+			}
+		case DIRECTION_LEFT:
+			x -= insinstruction.length
+
+			if x < minX {
+				minX = x
+			}
+		}
+	}
+
+	common.Log.Debug().Int("maxX", maxX).Int("minX", minX).Int("maxY", maxY).Int("minY", minY).Send()
+
+	spacing := 0
+	field := make(common.Graph[rune], maxY+spacing-minY+1)
+	for i := 0; i < maxY+spacing-minY+1; i++ {
+		field[i] = make([]rune, maxX+spacing-minX+1)
+
+		for j := 0; j < maxX+spacing-minX+1; j++ {
+			field[i][j] = converter[" "]
+		}
+	}
+	common.PrintGraphRune(field)
+
+	bfsContainer := bfsContainer[rune]{field: field, xOffset: minY, yOffset: minX}
+
+	bfsContainer.Start(0, 0, instructions, converter, TypedEndPoints)
+	bfsContainer.cleanUp(field)
+	inside := bfsContainer.countInside(field)
+	visited := bfsContainer.Visited()
+
+	common.PrintGraphRune(field)
+	common.Log.Debug().Int("inside", inside).Int("visited", visited).Int("tots", visited+inside).Send()
+
+	return visited + inside
+}
+
+var TypedEndPoints = map[string]rune{
+	"RD": '7',
+	"RU": 'J',
+	"LD": 'F',
+	"LU": 'L',
+	"DR": 'L',
+	"DL": 'J',
+	"UR": 'F',
+	"UL": '7',
+}
+
+func Part2(instructions []instruction) int {
+	return 0
+}
+
+func pointToString(x, y int) string {
+	return fmt.Sprintf("%d,%d", x, y)
+}
+
+type bfsContainer[T comparable] struct {
+	field common.Graph[T]
+	done  map[string]bool
+
+	markSet map[string]T
+
+	xOffset, yOffset int
+}
+
+func (b *bfsContainer[T]) Start(x, y int, ins []instruction, markSet map[string]T, endPoints map[string]T) {
+	b.done = make(map[string]bool)
+	b.markSet = markSet
+
+	common.Log.Debug().Str("staring", "bfs").Send()
+
+	b.basicBFS(x, y, ins, endPoints)
+}
+
+func (b *bfsContainer[T]) Visited() int {
+	return len(b.done)
+}
+
+var converter = map[string]rune{
+	"|": '|',
+	"-": '-',
+	" ": ' ',
+	"J": 'J',
+	"F": 'F',
+	"L": 'L',
+	"7": '7',
+	"x": 'x',
+}
+
+func (b *bfsContainer[T]) basicBFS(startX, startY int, instructions []instruction, endPoints map[string]T) {
+	i, j := startX-b.xOffset, startY-b.yOffset
+
+	b.done[pointToString(i, j)] = true
+
+	for k, insinstruction := range instructions {
+
+		// common.Log.Debug().Int("", k).Ints(":", []int{i, j}).Str("d", insinstruction.direction).Int("l", insinstruction.length).Send()
+		switch insinstruction.direction {
+		case DIRECTION_DOWN:
+			for di := 1; di < insinstruction.length; di++ {
+				x := i + di
+				y := j
+				b.field[x][y] = b.markSet["|"]
+				b.done[pointToString(x, y)] = true
+			}
+			i += insinstruction.length
+		case DIRECTION_UP:
+			for di := 1; di < insinstruction.length; di++ {
+				x := i - di
+				y := j
+				b.field[x][y] = b.markSet["|"]
+				b.done[pointToString(x, y)] = true
+			}
+			i -= insinstruction.length
+		case DIRECTION_RIGHT:
+			for dj := 1; dj < insinstruction.length; dj++ {
+				x := i
+				y := j + dj
+				b.field[x][y] = b.markSet["-"]
+				b.done[pointToString(x, y)] = true
+			}
+			j += insinstruction.length
+		case DIRECTION_LEFT:
+			for dj := 1; dj < insinstruction.length; dj++ {
+				x := i
+				y := j - dj
+				b.field[x][y] = b.markSet["-"]
+				b.done[pointToString(x, y)] = true
+			}
+			j -= insinstruction.length
+		}
+		b.done[pointToString(i, j)] = true
+
+		if k < len(instructions)-1 {
+			b.field[i][j] = endPoints[insinstruction.direction+instructions[k+1].direction]
+		}
+	}
+
+	b.field[i][j] = endPoints[instructions[len(instructions)-1].direction+instructions[0].direction]
+}
+
+func (b *bfsContainer[T]) cleanUp(field common.Graph[T]) {
+
+	for x := 0; x < len(field); x++ {
+
+		for y := 0; y < len(field[0]); y++ {
+			if b.done[pointToString(x, y)] {
+				break
+			}
+			field[x][y] = b.markSet[" "]
+		}
+
+		for y := len(field[0]) - 1; y > -1; y-- {
+			if b.done[pointToString(x, y)] {
+				break
+			}
+			field[x][y] = b.markSet[" "]
+		}
+	}
+
+}
+
+func (b *bfsContainer[T]) countInside(field common.Graph[T]) int {
+	count := 0
+
+	for x := 0; x < len(field); x++ {
+		lastWas := b.markSet["x"]
+		inside := false
+
+		for y := 0; y < len(field[0]); y++ {
+
+			if !b.done[pointToString(x, y)] {
+				if inside {
+					// common.Log.Debug().Ints("inside", []int{x, y}).Send()
+
+					count++
+				}
+				continue
+			}
+
+			tile := field[x][y]
+
+			verticalTile := (tile == b.markSet["|"] || tile == b.markSet["J"] || tile == b.markSet["L"] || tile == b.markSet["7"] || tile == b.markSet["F"])
+
+			if !verticalTile {
+				continue
+			}
+
+			if tile == b.markSet["|"] {
+				inside = !inside
+				continue
+			}
+
+			if lastWas == b.markSet["x"] {
+				lastWas = tile
+				continue
+			}
+
+			if lastWas == b.markSet["L"] && tile == b.markSet["7"] {
+				inside = !inside
+			}
+
+			if lastWas == b.markSet["F"] && tile == b.markSet["J"] {
+				inside = !inside
+			}
+			lastWas = b.markSet["x"]
+
+		}
+	}
+	common.Log.Debug().Int("Final", count).Send()
+
+	return count
+}
