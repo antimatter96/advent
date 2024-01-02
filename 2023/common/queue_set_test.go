@@ -4,11 +4,11 @@ import (
 	"testing"
 )
 
-func TestQueue(t *testing.T) {
+func TestQueueSet(t *testing.T) {
 	var isEmpty bool
 	var size, popped int
 
-	q := Queue[int]{}
+	q := QueueSet[int]{}
 
 	isEmpty = q.Empty()
 	if isEmpty != true {
@@ -28,6 +28,13 @@ func TestQueue(t *testing.T) {
 	size = q.Size()
 	if size != 1 {
 		t.Errorf("expected %d but got %d", 1, size)
+	}
+
+	q.Push(8)
+
+	size = q.Size()
+	if size != 2 {
+		t.Errorf("expected %d but got %d", 2, size)
 	}
 
 	q.Push(8)
