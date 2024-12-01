@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"go.testFlags": ["-count=1"],
+		"window.zoomPerWindow": true,
+		"window.zoomLevel": 0.8,
+	}
+}
