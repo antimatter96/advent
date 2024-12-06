@@ -17,20 +17,34 @@ type Directions struct {
 	NextI, NextJ NextFunc
 }
 
+var DirectionChanges = map[string]*Directions{
+	"UP":   &Directions{NextI: Dec1, NextJ: NoChange},
+	"DOWN": &Directions{NextI: Inc1, NextJ: NoChange},
+
+	"LEFT":  &Directions{NextI: NoChange, NextJ: Dec1},
+	"RIGHT": &Directions{NextI: NoChange, NextJ: Inc1},
+
+	"UP-LEFT":    &Directions{NextI: Dec1, NextJ: Dec1},
+	"UP-RIGHT":   &Directions{NextI: Dec1, NextJ: Inc1},
+	"DOWN-RIGHT": &Directions{NextI: Inc1, NextJ: Inc1},
+	"DOWN-LEFT":  &Directions{NextI: Inc1, NextJ: Dec1},
+}
+
+var RotationRight = map[string]string{
+	"UP":    "RIGHT",
+	"LEFT":  "UP",
+	"RIGHT": "DOWN",
+	"DOWN":  "LEFT",
+}
+
 func GenerateDirections(i, j int) map[string]*Directions {
-	return map[string]*Directions{
-		"UP":   {i - 1, j, Dec1, NoChange},
-		"DOWN": {i + 1, j, Inc1, NoChange},
+	mp := make(map[string]*Directions)
 
-		"LEFT":  {i, j - 1, NoChange, Dec1},
-		"RIGHT": {i, j + 1, NoChange, Inc1},
-
-		"UP-LEFT":    {i - 1, j - 1, Dec1, Dec1},
-		"UP-RIGHT":   {i - 1, j + 1, Dec1, Inc1},
-		"DOWN-RIGHT": {i + 1, j + 1, Inc1, Inc1},
-		"DOWN-LEFT":  {i + 1, j - 1, Inc1, Dec1},
+	for dirString, dir := range DirectionChanges {
+		mp[dirString] = &Directions{I: dir.NextI(i), J: dir.NextJ(j), NextI: dir.NextI, NextJ: dir.NextJ}
 	}
 
+	return mp
 }
 
 /*
