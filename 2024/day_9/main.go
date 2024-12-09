@@ -13,7 +13,7 @@ func main() {
 }
 
 type block struct {
-	occupied []int
+	occupied [][]int
 	free     int
 }
 
@@ -24,9 +24,11 @@ func parsePart1(inp []string) []block {
 		n := int(n_s) - 48
 
 		if i%2 == 0 {
-			blocks[i].occupied = make([]int, n)
+			blocks[i].occupied = make([][]int, 1)
+
+			blocks[i].occupied[0] = make([]int, n)
 			for j := 0; j < n; j++ {
-				blocks[i].occupied[j] = i / 2
+				blocks[i].occupied[0][j] = i / 2
 			}
 		} else {
 			blocks[i].free = n
@@ -57,23 +59,29 @@ func Part1(inp []block) int {
 		for first < len(inp) && (inp[first].free == 0) {
 			first++
 		}
-		for last > -1 && len(inp[last].occupied) == 0 {
+		for last > -1 && (len(inp[last].occupied) == 0 || len(inp[last].occupied[0]) == 0) {
 			last--
 		}
+
 		inp[first].free--
 		if inp[first].occupied == nil {
-			inp[first].occupied = make([]int, 0)
+			inp[first].occupied = make([][]int, 1)
+			inp[first].occupied[0] = make([]int, 0)
 		}
-		inp[first].occupied = append(inp[first].occupied, inp[last].occupied[0])
-		inp[last].occupied = inp[last].occupied[1:]
+
+		inp[first].occupied[0] = append(inp[first].occupied[0], inp[last].occupied[0][0])
+		inp[last].occupied[0] = inp[last].occupied[0][1:]
 	}
 
 	n := 0
 	for _, y := range inp {
-		for _, e := range y.occupied {
-			sum += n * e
-			n++
+		for _, occ := range y.occupied {
+			for _, e := range occ {
+				sum += n * e
+				n++
+			}
 		}
+
 	}
 	return sum
 }
