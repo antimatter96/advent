@@ -8,5 +8,7 @@
 		"go.testFlags": ["-count=1"],
 		"window.zoomPerWindow": true,
 		"window.zoomLevel": 0.8,
+		"terminal.integrated.fontWeight": "500",
+		"terminal.integrated.fontFamily": "FiraCode NF"
 	}
 }
