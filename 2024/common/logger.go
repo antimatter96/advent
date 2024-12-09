@@ -11,12 +11,14 @@ import (
 )
 
 var Log zerolog.Logger
+var ADVENT_DEBUG bool
 
 func init() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	adventDebug, ok := os.LookupEnv("ADVENT_DEBUG")
 	if ok && adventDebug == "true" {
+		ADVENT_DEBUG = true
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 

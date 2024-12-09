@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"slices"
+	"strings"
+
 	"github.com/antimatter96/advent/2024/common"
 )
 
@@ -73,21 +77,104 @@ func Part1(inp []block) int {
 		inp[last].occupied[0] = inp[last].occupied[0][1:]
 	}
 
-	n := 0
-	for _, y := range inp {
-		for _, occ := range y.occupied {
-			for _, e := range occ {
-				sum += n * e
-				n++
-			}
-		}
-
-	}
+	sum += sumBlocks(inp)
 	return sum
 }
 
 func Part2(inp []block) int {
 	var sum int
 
+	moved := make(map[int]bool)
+	for tryingBlock := len(inp) - 1; tryingBlock > -1; tryingBlock-- {
+		print(inp)
+		first := 0
+		last := tryingBlock
+
+		if len(inp[last].occupied) == 0 {
+			continue
+		}
+		trying := 0
+		for trying < len(inp[last].occupied) && (len(inp[last].occupied[0]) == 0 || moved[inp[last].occupied[trying][0]]) {
+			trying++
+		}
+		if trying >= len(inp[last].occupied) {
+			continue
+		}
+
+		for first < len(inp) && (inp[first].free < len(inp[last].occupied[trying])) {
+			first++
+		}
+		if first >= len(inp) || (inp[first].free <= 0 && inp[first].free < len(inp[last].occupied[trying])) {
+			continue
+		}
+
+		if first >= last {
+			continue
+		}
+
+		if inp[first].occupied == nil {
+			inp[first].occupied = make([][]int, 1)
+			inp[first].occupied[0] = make([]int, 0)
+		} else {
+			inp[first].occupied = append(inp[first].occupied, []int{})
+		}
+
+		whereToInsert := len(inp[first].occupied) - 1
+
+		n := len(inp[last].occupied[trying])
+
+		for x := 0; x < len(inp[last].occupied[trying]); x++ {
+			inp[first].occupied[whereToInsert] = append(inp[first].occupied[whereToInsert], inp[last].occupied[trying][x])
+			moved[inp[last].occupied[trying][x]] = true
+		}
+		inp[first].free -= n
+		inp[last].free += n
+
+		inp[last].occupied[trying] = nil
+		inp[last].occupied = slices.DeleteFunc(inp[last].occupied, func(e []int) bool { return len(e) == 0 })
+
+		print(inp)
+	}
+
+	sum += sumBlocks(inp)
+
 	return sum
+}
+
+func sumBlocks(blocks []block) int {
+	sum := 0
+	n := 0
+	for _, y := range blocks {
+		for _, occ := range y.occupied {
+			for _, e := range occ {
+				sum += n * e
+				n++
+			}
+		}
+		n += y.free
+	}
+
+	return sum
+}
+
+func print(blocks []block) {
+	if !common.ADVENT_DEBUG {
+		return
+	}
+
+	str := strings.Builder{}
+	for _, block := range blocks {
+		if len(block.occupied) > 0 {
+			for _, x := range block.occupied {
+				str.WriteString(fmt.Sprintf("%v", x))
+			}
+		}
+		if block.free > 0 {
+			str.WriteString(strings.Repeat(".", block.free))
+		}
+		str.WriteString("//")
+	}
+
+	str.WriteString("\n")
+	common.Log.Debug().Str("s", str.String())
 }
