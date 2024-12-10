@@ -34,3 +34,13 @@ func CopyPointerGraph[T comparable](graph Graph[*T]) Graph[*T] {
 	return mp
 
 }
+
+func CopyGraph[T comparable](graph Graph[T]) Graph[T] {
+	mp := make([][]T, len(graph))
+	for i := 0; i < len(mp); i++ {
+		mp[i] = make([]T, len(graph[0]))
+		copy(mp[i], graph[i])
+	}
+	return mp
+
+}
