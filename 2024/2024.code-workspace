@@ -7,8 +7,8 @@
 	"settings": {
 		"go.testFlags": ["-count=1"],
 		"window.zoomPerWindow": true,
-		"window.zoomLevel": 0.8,
+		"window.zoomLevel": 0.77,
 		"terminal.integrated.fontWeight": "500",
-		"terminal.integrated.fontFamily": "FiraCode NF"
+		"terminal.integrated.fontFamily": "FiraCode NF, 'FiraCode Nerd Font'"
 	}
 }
