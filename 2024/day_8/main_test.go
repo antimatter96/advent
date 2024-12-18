@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-const p1Answer int = 41
-const p2Answer int = 6
+const p1Answer int = 14
+const p2Answer int = 34
 
 var testInput1 = []string{
 	"............",

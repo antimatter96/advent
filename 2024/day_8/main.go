@@ -87,7 +87,7 @@ func Part2(inp Input) int {
 
 	for _, points := range inp.points {
 		for i := 0; i < len(points); i++ {
-			// addToGraph(mp, points[i], inp.m, inp.n, inp.graph)
+			addToGraph(mp, points[i], inp.m, inp.n)
 
 			for j := i + 1; j < len(points); j++ {
 				// addToGraph(mp, points[j], inp.m, inp.n, inp.graph)

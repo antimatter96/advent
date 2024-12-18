@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-const p1Answer int = 1928
-const p2Answer int = 2858
+const p1Answer int = 55312
+const p2Answer int = 65601038650482
 
 var testInput1 = "125 17"
 

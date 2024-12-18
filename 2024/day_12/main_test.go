@@ -5,7 +5,7 @@ import (
 )
 
 const p1Answer int = 1930
-const p2Answer int = 6
+const p2Answer int = 1206
 
 var testInput1 = []string{
 	"RRRRIICCFF",
