@@ -11,7 +11,7 @@ func main() {
 
 	p1, p2 := Run(rawInput)
 	common.Log.Info().Int("Answer 1", p1).Send()
-	common.Log.Info().Int("Answer 2", p2).Send()
+	common.Log.Info().Str("Answer 2", p2).Send()
 }
 
 var M int
@@ -38,8 +38,7 @@ func parsePart2(inp []string) []common.Point {
 	return parsePart1(inp)
 }
 
-func Run(inp []string) (int, int) {
-
+func Run(inp []string) (int, string) {
 	parsedPart1 := parsePart1(inp)
 	parsedPart2 := parsePart2(inp)
 
@@ -59,24 +58,63 @@ func Part1(points []common.Point) int {
 		copy(graph[i], fullArray)
 	}
 
-	var sum int
-
-	graph.Print()
-
 	for i := 0; i < LOOPS; i++ {
 		point := points[i]
 		graph[point.Y][point.X] = "#"
 	}
 
-	graph.Print()
+	return possible(graph, M)
+}
 
+func Part2(points []common.Point) string {
+	graph := make(common.Graph[string], M+1)
+	for i := 0; i < M+1; i++ {
+		graph[i] = make([]string, M+1)
+		copy(graph[i], fullArray)
+	}
+
+	graphs := make([]common.Graph[string], len(points)+1)
+	graphs[0] = common.CopyGraph(graph)
+
+	for appliedTill := 1; appliedTill < len(points)+1; appliedTill++ {
+		graphs[appliedTill] = common.CopyGraph(graphs[appliedTill-1])
+		point := points[appliedTill-1]
+		graphs[appliedTill][point.Y][point.X] = "#"
+	}
+
+	lo, hi := 0, len(points)
+
+	for {
+		if lo == hi {
+			return points[lo-1].String()
+		}
+
+		mid := (hi + lo) / 2
+
+		possibleMid := possible(graphs[mid], M)
+		if possibleMid != -1 {
+			lo = mid + 1
+			continue
+		}
+
+		possibleLo := possible(graphs[lo], M)
+		if possibleLo != -1 {
+			hi = mid - 1
+			lo += 1
+			continue
+		}
+	}
+
+	return ""
+}
+
+func possible(graph common.Graph[string], m int) int {
 	queue := common.QueueSet[string]{}
 	queue.Push((&common.Point{X: 0, Y: 0}).String())
 
 	dist := make(map[string]int, 0)
 	dist["0,0"] = 0
-	goDiagnol := false
-bfs:
+
 	for !queue.Empty() {
 		p := queue.Pop()
 
@@ -88,7 +126,7 @@ bfs:
 			for incY := -1; incY < 2; incY++ {
 				y := pp.Y + incY
 
-				if !goDiagnol && incX*incY != 0 {
+				if incX*incY != 0 {
 					continue
 				}
 
@@ -103,21 +141,13 @@ bfs:
 						dist[(&common.Point{X: x, Y: y}).String()] = dist[p] + 1
 					}
 
-					if x == M && y == M {
-						fmt.Println(dist[str])
-						break bfs
+					if x == m && y == m {
+						return dist[str]
 					}
 				}
 			}
 		}
-
 	}
 
-	fmt.Println(dist)
-
-	return sum
-}
-
-func Part2(points []common.Point) int {
-	return 0
+	return -1
 }
