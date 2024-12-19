@@ -104,36 +104,30 @@ func (c *computer) proceed(programs *inputBuffer) int {
 	// fmt.Println("running", opcode, programs.arr[programs.head:], c.a, c.b, c.c)
 	// fmt.Println("out", c.output)
 
+	combo := programs.getNext()
+
 	switch opcode {
 	case 0:
-		combo := programs.getNext()
 		combo = c.getOperand(combo)
 		c.a = c.a / (1 << combo)
 	case 1:
-		combo := programs.getNext()
 		c.b = c.b ^ combo
 	case 2:
-		combo := programs.getNext()
 		combo = c.getOperand(combo)
 		c.b = combo & 7
 	case 3:
-		combo := programs.getNext()
 		if c.a != 0 {
 			programs.set(combo)
 		}
 	case 4:
-		_ = programs.getNext()
 		c.b = (c.b ^ c.c)
 	case 5:
-		combo := programs.getNext()
 		combo = c.getOperand(combo)
 		c.addToOutput(combo % 8)
 	case 6:
-		combo := programs.getNext()
 		combo = c.getOperand(combo)
 		c.b = c.a / (1 << combo)
 	case 7:
-		combo := programs.getNext()
 		combo = c.getOperand(combo)
 		c.c = c.a / (1 << combo)
 	}
@@ -142,7 +136,7 @@ func (c *computer) proceed(programs *inputBuffer) int {
 }
 
 func Part1(info input) int {
-	c := &computer{a: info.a, b: info.b, c: info.c}
+	c := &computer{a: info.a, b: info.b, c: info.c, output: make([]int, 0, len(info.commands))}
 	inputBuffer := &inputBuffer{arr: info.commands, head: 0}
 
 	for !inputBuffer.end() {
@@ -168,35 +162,41 @@ func Part2(info input) int {
 	// inr := 2
 
 	//	inFocus := 5
-	producer := getOutputForA(info)
-	for i := LO; i <= HI; i += 209095600 {
-		//i += 3
-		output := producer(i)
 
-		fmt.Println(i, strconv.FormatInt(int64(i), 2), output)
+	bfr := &inputBuffer{arr: info.commands, head: 0}
+	c := &computer{output: make([]int, 0, len(info.commands))}
 
-		if slices.Equal(expectedOutput, output) {
-			fmt.Println("FINAL FOUND", i, expectedOutput, output)
-			// break
+	total := HI - LO
+mainLoop:
+	for i := LO; i <= HI; i += 1 {
+		diff := i - LO
+		if diff%1_000_000_000 == 0 {
+			fmt.Println(i, 100*diff/total)
 		}
+		//
+		bfr.head = 0
+		clear(c.output)
+		c.output = c.output[:0]
+
+		c.a = i
+		c.b = info.b + 0
+		c.c = info.c + 0
+		//
+		for !bfr.end() {
+			c.proceed(bfr)
+			if !slices.Equal(expectedOutput[:len(c.output)], c.output[:len(c.output)]) {
+				continue mainLoop
+			}
+		}
+		//
+
+		fmt.Println(i, (c.output), strconv.FormatInt(int64(i), 2))
 
 		// binary := []rune(strconv.FormatInt(int64(i), 2))
 		// slices.Reverse(binary)
 	}
 
 	return 0
-}
-
-func getOutputForA(info input) func(int) []int {
-	return func(a int) []int {
-		c := &computer{a: a, b: info.b + 0, c: info.c + 0, output: make([]int, 0)}
-		bfr := &inputBuffer{arr: info.commands, head: 0}
-		for !bfr.end() {
-			c.proceed(bfr)
-		}
-
-		return c.output
-	}
 }
 
 func compareArrays(a, b []int) string {
@@ -208,6 +208,16 @@ func compareArrays(a, b []int) string {
 		} else {
 			arr.WriteRune('.')
 		}
+	}
+
+	return arr.String()
+}
+
+func asString(a []int) string {
+	arr := strings.Builder{}
+
+	for i := 0; i < len(a); i++ {
+		arr.WriteByte(byte(a[i]) + 48)
 	}
 
 	return arr.String()
